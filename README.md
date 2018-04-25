@@ -1,6 +1,6 @@
 # Observer
 
-[![Build Status](https://travis-ci.org/yaacov/observer.svg?branch=master)](https://travis-ci.orgyaacov/observer)
+[![Build Status](https://travis-ci.org/yaacov/observer.svg?branch=master)](https://travis-ci.org/yaacov/observer)
 
 ## Description
 
