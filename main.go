@@ -31,9 +31,18 @@ func main() {
 	o.Open()
 	o.Run()
 
-	o.Emit("hello")
-	o.Emit("By")
+	o.Emit("Hello")
 
-	time.Sleep(10 * time.Second)
+	o.AddListener(func(e interface{}) {
+		log.Printf("Recived: %s.\n", e.(string))
+	})
+
+	time.Sleep(2 * time.Second)
+	o.Emit("Holla")
+
+	time.Sleep(2 * time.Second)
+	o.Emit("Hy")
+
+	time.Sleep(3 * time.Second)
 	o.Close()
 }

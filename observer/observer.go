@@ -18,12 +18,14 @@ package observer
 
 import (
 	"fmt"
-	"log"
 )
 
+type Listener func(interface{})
+
 type Observer struct {
-	quit   chan bool
-	events chan string
+	quit      chan bool
+	events    chan interface{}
+	listeners []Listener
 }
 
 // Open the observer channles
@@ -34,13 +36,20 @@ func (o *Observer) Open() error {
 
 	// Create the observer channels
 	o.quit = make(chan bool)
-	o.events = make(chan string)
+	o.events = make(chan interface{})
+
+	// Init an empty listeners list
+	o.listeners = make([]Listener, 0)
 
 	return nil
 }
 
 // Close the observer channles
 func (o *Observer) Close() error {
+	// Send a quit signal
+	o.quit <- true
+
+	// Close channels
 	close(o.quit)
 	close(o.events)
 
@@ -54,7 +63,10 @@ func (o *Observer) Run() error {
 		for {
 			select {
 			case event := <-o.events:
-				log.Printf("received: %s\n", event)
+				// Run all listeners for this event
+				for _, listener := range o.listeners {
+					go listener(event)
+				}
 			case <-o.quit:
 				return
 			}
@@ -65,7 +77,14 @@ func (o *Observer) Run() error {
 }
 
 // Emit an event
-func (o *Observer) Emit(event string) error {
+func (o *Observer) AddListener(l Listener) error {
+	o.listeners = append(o.listeners, l)
+
+	return nil
+}
+
+// Emit an event
+func (o *Observer) Emit(event interface{}) error {
 	o.events <- event
 
 	return nil
