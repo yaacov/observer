@@ -10,7 +10,7 @@ This observer emplements event emitter and listener pattern in go,
 the observer register a list of listener functions and implement an event emitter,
 once an event is emited, all listener functions will be called.
 
-This observer also abstruct watching for file changes, users can register a list for files to wathch,
+This observer also abstruct watching for file changes, users can register a list for files to watch,
 once a file is watched, events will be emitted automatically on each file modification.
 
 This Observe is using golang [channels](https://gobyexample.com/channels) for emiting events and [fsnotify](https://github.com/fsnotify/fsnotify) for watching file changes.
@@ -32,7 +32,9 @@ $ ./obs-example
 | Emit(event interface{})        | Emit event                        |
 | Watch(files []string)          | Watch for file changes, and emit a file change events |
 
-## Example
+## Examples
+
+### Emit string events
 
 ``` go
 import (
@@ -61,7 +63,7 @@ main() {
 }
 ```
 
-## Example watching file
+### Watch, emit events on file modification
 
 ``` go
 import (
