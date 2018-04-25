@@ -22,6 +22,7 @@ This observer is using golang [channels](https://gobyexample.com/channels) for e
 ## Develop
 
 ```
+$ make vendor
 $ make
 $ ./obs-example
 ```
