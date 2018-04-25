@@ -10,10 +10,10 @@ Yet another go observer / listener.
 
 ```
 import (
-	"log"
-	"time"
+  "log"
+  "time"
 
-	"github.com/yaacov/observer/observer"
+  "github.com/yaacov/observer/observer"
 )
 
 main() {
