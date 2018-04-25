@@ -17,7 +17,7 @@ This Observe is using golang [channels](https://gobyexample.com/channels) for em
 
 #### Examples:
   - [Emit string events](#emit-string-events)
-  - [Watch files, emit file cahnge events](#watch-emit-events-on-file-modification)
+  - [Watch files, emit file cahnge events](#watch-files-emit-file-change-events)
 
 ## Develop
 
@@ -67,7 +67,7 @@ main() {
 }
 ```
 
-### Watch, emit events on file modification
+### Watch files, emit file change events
 
 ``` go
 import (
