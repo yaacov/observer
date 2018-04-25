@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package observer API REST server
+// Package observer for events
 package observer
 
 import (
