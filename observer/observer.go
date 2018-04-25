@@ -28,7 +28,7 @@ type Observer struct {
 	listeners []Listener
 }
 
-// Open the observer channles
+// Open the observer channles and run observer loop
 func (o *Observer) Open() error {
 	if o.events != nil {
 		return fmt.Errorf("Observer already inititated.")
@@ -41,7 +41,8 @@ func (o *Observer) Open() error {
 	// Init an empty listeners list
 	o.listeners = make([]Listener, 0)
 
-	return nil
+	// Run the observer
+	return o.Run()
 }
 
 // Close the observer channles

@@ -29,14 +29,13 @@ func main() {
 	// Open observer and start running
 	o := observer.Observer{}
 	o.Open()
-	o.Run()
 
 	// This event will not run any listener
 	o.Emit("Hello")
 
-	// Add a listner that logs events
+	// Add a listener that logs events
 	o.AddListener(func(e interface{}) {
-		log.Printf("Recived: %s.\n", e.(string))
+		log.Printf("Received: %s.\n", e.(string))
 	})
 
 	// This events will be loged
