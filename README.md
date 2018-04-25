@@ -6,6 +6,13 @@
 
 Yet another go observer / listener.
 
+## Develop
+
+```
+$ make
+$ ./obs-example
+```
+
 ## Example
 
 ``` go
