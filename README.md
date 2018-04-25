@@ -73,11 +73,11 @@ main() {
   })
 
   // Watch for changes in LICENSE file
-	err := o.Watch([]string{"LICENSE"})
-	if err != nil {
-		log.Fatal("Error: ", err)
-	}
-	log.Print("Observer is watching the LICENSE file, try to change it.\n")
+  err := o.Watch([]string{"LICENSE"})
+  if err != nil {
+    log.Fatal("Error: ", err)
+  }
+  log.Print("Observer is watching the LICENSE file, try to change it.\n")
 
   // Wait 10s for changes in file
   time.Sleep(10 * time.Second)
