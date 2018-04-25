@@ -13,7 +13,7 @@ once an event is emited, all listener functions will be called.
 This observer also abstruct watching for file changes, users can register a list for files to watch,
 once a file is watched, events will be emitted automatically on each file modification.
 
-This Observe is using golang [channels](https://gobyexample.com/channels) for emiting events and [fsnotify](https://github.com/fsnotify/fsnotify) for watching file changes.
+This observer is using golang [channels](https://gobyexample.com/channels) for emiting events and [fsnotify](https://github.com/fsnotify/fsnotify) for watching file changes.
 
 #### Examples:
   - [Emit string events](#emit-string-events)
