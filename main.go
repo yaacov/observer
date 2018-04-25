@@ -26,23 +26,26 @@ import (
 func main() {
 	log.Print("Observer Example\n")
 
+	// Open observer and start running
 	o := observer.Observer{}
-
 	o.Open()
 	o.Run()
 
+	// This event will not run any listener
 	o.Emit("Hello")
 
+	// Add a listner that logs events
 	o.AddListener(func(e interface{}) {
 		log.Printf("Recived: %s.\n", e.(string))
 	})
 
+	// This events will be loged
 	time.Sleep(2 * time.Second)
 	o.Emit("Holla")
-
 	time.Sleep(2 * time.Second)
 	o.Emit("Hy")
 
+	// Close observer
 	time.Sleep(3 * time.Second)
 	o.Close()
 }
