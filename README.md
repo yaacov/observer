@@ -1,10 +1,19 @@
 # Observer
 
+Event emitter and listener with builtin file watcher.
+
 [![Build Status](https://travis-ci.org/yaacov/observer.svg?branch=master)](https://travis-ci.org/yaacov/observer)
 
 ## Description
 
-Yet another go observer / listener.
+This observer emplements event emitter and listener pattern in go,
+the observer register a list of listener functions and implement an event emitter,
+once an event is emited, all listener functions will be called.
+
+This observer also abstruct watching for file changes, users can register a list for files to wathch,
+once a file is watched, events will be emitted automatically on each file modification.
+
+This Observe is using golang [channels](https://gobyexample.com/channels) for emiting events and [fsnotify](https://github.com/fsnotify/fsnotify) for watching file changes.
 
 ## Develop
 
