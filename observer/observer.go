@@ -13,18 +13,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package server API REST server
+// Package observer API REST server
 package observer
 
 import (
 	"fmt"
+
+	"github.com/fsnotify/fsnotify"
 )
 
+// Listener is the function type to run on events.
 type Listener func(interface{})
 
+// Observer emplements the observer pattern
 type Observer struct {
 	quit      chan bool
 	events    chan interface{}
+	watcher   *fsnotify.Watcher
 	listeners []Listener
 }
 
@@ -54,6 +59,11 @@ func (o *Observer) Close() error {
 	close(o.quit)
 	close(o.events)
 
+	// Close file watcher
+	if o.watcher == nil {
+		o.watcher.Close()
+	}
+
 	return nil
 }
 
@@ -77,7 +87,7 @@ func (o *Observer) Run() error {
 	return nil
 }
 
-// Emit an event
+// AddListener adds a listener function to run on event.
 func (o *Observer) AddListener(l Listener) error {
 	o.listeners = append(o.listeners, l)
 
@@ -87,6 +97,55 @@ func (o *Observer) AddListener(l Listener) error {
 // Emit an event
 func (o *Observer) Emit(event interface{}) error {
 	o.events <- event
+
+	return nil
+}
+
+// RunWatch run a Watcher for file changes
+func (o *Observer) RunWatch() error {
+	var err error
+
+	o.watcher, err = fsnotify.NewWatcher()
+	if err != nil {
+		return err
+	}
+
+	// Listen for file changes
+	go func() {
+		for {
+			select {
+			case event := <-o.watcher.Events:
+				if event.Op&fsnotify.Write == fsnotify.Write {
+					o.Emit(event)
+				}
+			case err := <-o.watcher.Errors:
+				if err != nil {
+					o.Emit(err)
+				}
+			}
+		}
+	}()
+
+	return nil
+}
+
+// Watch for file changes
+func (o *Observer) Watch(files []string) error {
+	// Init watcher on first call
+	if o.watcher == nil {
+		err := o.RunWatch()
+		if err != nil {
+			return err
+		}
+	}
+
+	// Add files to watch
+	for _, f := range files {
+		err := o.watcher.Add(f)
+		if err != nil {
+			return err
+		}
+	}
 
 	return nil
 }

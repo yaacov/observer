@@ -29,22 +29,31 @@ func main() {
 	// Open observer and start running
 	o := observer.Observer{}
 	o.Open()
+	defer o.Close()
 
-	// This event will not run any listener
-	o.Emit("Hello")
+	// Watch for changes in LICENSE file
+	err := o.Watch([]string{"LICENSE"})
+	if err != nil {
+		log.Fatal("Error: ", err)
+	}
+	log.Print("Observer is watching LICENSE file, try to change it.\n")
 
 	// Add a listener that logs events
 	o.AddListener(func(e interface{}) {
-		log.Printf("Received: %s.\n", e.(string))
+		log.Printf("Received: %v.\n", e)
 	})
 
 	// This events will be loged
-	time.Sleep(2 * time.Second)
-	o.Emit("Holla")
-	time.Sleep(2 * time.Second)
-	o.Emit("Hy")
+	go func() {
+		time.Sleep(2 * time.Second)
+		o.Emit("Holla")
+	}()
 
-	// Close observer
-	time.Sleep(3 * time.Second)
-	o.Close()
+	go func() {
+		time.Sleep(1 * time.Second)
+		o.Emit("Hy")
+	}()
+
+	// Wait for events
+	time.Sleep(10 * time.Second)
 }
