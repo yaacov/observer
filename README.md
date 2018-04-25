@@ -8,7 +8,7 @@ Yet another go observer / listener.
 
 ## Example
 
-```
+``` go
 import (
   "log"
   "time"
