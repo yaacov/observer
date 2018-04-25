@@ -15,17 +15,13 @@ $ ./obs-example
 
 ## API
 
-Method                         | Description
-============================================
-Open()                         | Open the observer channels
---------------------------------------------
-Close()                        | Close the observer channels
---------------------------------------------
-AddListener(callback Listener) | Add a listener function to run on event
---------------------------------------------
-Emit(event interface{})        | Emit event
---------------------------------------------
-Watch(files []string)          | Watch for file changes, and emit an event on file change
+| Method                         | Description                       |
+|--------------------------------|-----------------------------------|
+| Open()                         | Open the observer channels        |
+| Close()                        | Close the observer channels       |
+| AddListener(callback Listener) | Add a listener function to run on event |
+| Emit(event interface{})        | Emit event                        |
+| Watch(files []string)          | Watch for file changes, and emit an event on file change |
 
 ## Example
 
