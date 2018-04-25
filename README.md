@@ -15,6 +15,10 @@ once a file is watched, events will be emitted automatically on each file modifi
 
 This Observe is using golang [channels](https://gobyexample.com/channels) for emiting events and [fsnotify](https://github.com/fsnotify/fsnotify) for watching file changes.
 
+#### Examples:
+  - [Emit string events](#emit-string-events)
+  - [Watch files, emit file cahnge events](#watch-emit-events-on-file-modification)
+
 ## Develop
 
 ```
