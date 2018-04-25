@@ -48,6 +48,7 @@ main() {
   // Open an observer and start running
   o := observer.Observer{}
   o.Open()
+  defer o.Close()
 
   // Add a listener that logs events
   o.AddListener(func(e interface{}) {
@@ -59,7 +60,6 @@ main() {
 
   // Close observer
   time.Sleep(3 * time.Second)
-  o.Close()
 }
 ```
 
@@ -77,6 +77,7 @@ main() {
   // Open an observer and start running
   o := observer.Observer{}
   o.Open()
+  defer o.Close()
 
   // Add a listener that logs events
   o.AddListener(func(e interface{}) {
@@ -92,6 +93,5 @@ main() {
 
   // Wait 10s for changes in file
   time.Sleep(10 * time.Second)
-  o.Close()
 }
 ```
