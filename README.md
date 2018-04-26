@@ -41,6 +41,8 @@ $ ./obs-example
 
 ### Emit string events
 
+Example of event listener and emitter.
+
 [emit.go](/examples/emit.go)
 
 ``` go
@@ -59,6 +61,8 @@ o.Emit("Hello")
 ```
 
 ### Watch files, emit file change events
+
+Example of file watching and listener.
 
 [file-watch.go](/examples/file-watch.go)
 
