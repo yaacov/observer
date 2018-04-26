@@ -18,6 +18,7 @@ package observer
 
 import (
 	"fmt"
+	"path/filepath"
 
 	"github.com/fsnotify/fsnotify"
 )
@@ -27,10 +28,12 @@ type Listener func(interface{})
 
 // Observer emplements the observer pattern
 type Observer struct {
-	quit      chan bool
-	events    chan interface{}
-	watcher   *fsnotify.Watcher
-	listeners []Listener
+	quit       chan bool
+	events     chan interface{}
+	watcher    *fsnotify.Watcher
+	watchFiles Set
+	watchDirs  Set
+	listeners  []Listener
 }
 
 // Open the observer channles and run observer loop
@@ -89,9 +92,18 @@ func (o *Observer) Watch(files []string) error {
 		}
 	}
 
-	// Add files to watch
+	// Add files and dirs to watch list
 	for _, f := range files {
-		err := o.watcher.Add(f)
+		base := filepath.Base(f)
+		dir := filepath.Dir(f)
+
+		o.watchFiles.Add(dir + string(filepath.Separator) + base)
+		o.watchDirs.Add(dir)
+	}
+
+	// Watch all directories containing watch files
+	for _, d := range o.watchDirs.Get() {
+		err := o.watcher.Add(d)
 		if err != nil {
 			return err
 		}
@@ -140,7 +152,10 @@ func (o *Observer) watchLoop() error {
 			select {
 			case event := <-o.watcher.Events:
 				if event.Op&fsnotify.Write == fsnotify.Write {
-					o.handleEvent(event)
+					// Check if we watch the file
+					if o.watchFiles.Has(event.Name) {
+						o.handleEvent(event)
+					}
 				}
 			case err := <-o.watcher.Errors:
 				if err != nil {
