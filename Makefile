@@ -22,7 +22,7 @@ clean:
 .PHONY: test-unit
 test-unit:
 	@echo "running unit tests"
-	@go test $(shell go list ./... | grep -v vendor)
+	@go test $(shell go list ./... | grep -v examples)
 
 .PHONY: install
 install: fmt observer
