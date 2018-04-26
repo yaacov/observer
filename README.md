@@ -41,62 +41,35 @@ $ ./obs-example
 
 ### Emit string events
 
+(emit.go)[/examples/emit.go]
+
 ``` go
-import (
-  "log"
-  "time"
+// Open an observer and start running
+o := observer.Observer{}
+o.Open()
+defer o.Close()
 
-  "github.com/yaacov/observer/observer"
-)
+// Add a listener that logs events
+o.AddListener(func(e interface{}) {
+  log.Printf("Received: %s.\n", e.(string))
+})
 
-main() {
-  // Open an observer and start running
-  o := observer.Observer{}
-  o.Open()
-  defer o.Close()
-
-  // Add a listener that logs events
-  o.AddListener(func(e interface{}) {
-    log.Printf("Received: %s.\n", e.(string))
-  })
-
-  // This event will be picked by the listener
-  o.Emit("Hello")
-
-  // Close observer
-  time.Sleep(3 * time.Second)
-}
+// This event will be picked by the listener
+o.Emit("Hello")
 ```
 
 ### Watch files, emit file change events
 
+(file-watch.go)[/examples/file-watch.go]
+
 ``` go
-import (
-  "log"
-  "time"
+// Open an observer and start watching for file modifications
+o := observer.Observer{}
+o.Watch([]string{"../LICENSE", "../README.md"})
+defer o.Close()
 
-  "github.com/yaacov/observer/observer"
-)
-
-main() {
-  // Open an observer and start running
-  o := observer.Observer{}
-  o.Open()
-  defer o.Close()
-
-  // Add a listener that logs events
-  o.AddListener(func(e interface{}) {
-    log.Printf("File modified: %v.\n", e)
-  })
-
-  // Watch for changes in LICENSE file
-  err := o.Watch([]string{"LICENSE"})
-  if err != nil {
-    log.Fatal("Error: ", err)
-  }
-  log.Print("Observer is watching the LICENSE file, try to change it.\n")
-
-  // Wait 10s for changes in file
-  time.Sleep(10 * time.Second)
-}
+// Add a listener that logs events
+o.AddListener(func(e interface{}) {
+  log.Printf("File modified: %v.\n", e)
+})
 ```

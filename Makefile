@@ -1,6 +1,6 @@
 PREFIX := $(GOPATH)
 BINDIR := $(PREFIX)/bin
-SOURCE := main.go observer/*.go
+SOURCE := main.go observer/*.go examples/*.go
 
 all: fmt obs-example
 

@@ -47,42 +47,25 @@ func (o *Observer) Open() error {
 	o.listeners = make([]Listener, 0)
 
 	// Run the observer
-	return o.Run()
+	return o.eventLoop()
 }
 
 // Close the observer channles
 func (o *Observer) Close() error {
-	// Send a quit signal
-	o.quit <- true
+	// Close event loop
+	if o.events != nil {
+		// Send a quit signal
+		o.quit <- true
 
-	// Close channels
-	close(o.quit)
-	close(o.events)
-
-	// Close file watcher
-	if o.watcher == nil {
-		o.watcher.Close()
+		// Close channels
+		close(o.quit)
+		close(o.events)
 	}
 
-	return nil
-}
-
-// Run the observer main loop
-func (o *Observer) Run() error {
-	// Run observer
-	go func() {
-		for {
-			select {
-			case event := <-o.events:
-				// Run all listeners for this event
-				for _, listener := range o.listeners {
-					go listener(event)
-				}
-			case <-o.quit:
-				return
-			}
-		}
-	}()
+	// Close file watcher
+	if o.watcher != nil {
+		o.watcher.Close()
+	}
 
 	return nil
 }
@@ -95,14 +78,58 @@ func (o *Observer) AddListener(l Listener) error {
 }
 
 // Emit an event
-func (o *Observer) Emit(event interface{}) error {
+func (o *Observer) Emit(event interface{}) {
 	o.events <- event
+}
+
+// Watch for file changes
+func (o *Observer) Watch(files []string) error {
+	// Init watcher on first call
+	if o.watcher == nil {
+		err := o.watchLoop()
+		if err != nil {
+			return err
+		}
+	}
+
+	// Add files to watch
+	for _, f := range files {
+		err := o.watcher.Add(f)
+		if err != nil {
+			return err
+		}
+	}
 
 	return nil
 }
 
-// RunWatch run a Watcher for file changes
-func (o *Observer) RunWatch() error {
+// handleEvent handle an event
+func (o *Observer) handleEvent(event interface{}) {
+	// Run all listeners for this event
+	for _, listener := range o.listeners {
+		go listener(event)
+	}
+}
+
+// eventLoop run the event loop
+func (o *Observer) eventLoop() error {
+	// Run observer
+	go func() {
+		for {
+			select {
+			case event := <-o.events:
+				o.handleEvent(event)
+			case <-o.quit:
+				return
+			}
+		}
+	}()
+
+	return nil
+}
+
+// watchLoop run a watcher for file changes
+func (o *Observer) watchLoop() error {
 	var err error
 
 	o.watcher, err = fsnotify.NewWatcher()
@@ -116,36 +143,15 @@ func (o *Observer) RunWatch() error {
 			select {
 			case event := <-o.watcher.Events:
 				if event.Op&fsnotify.Write == fsnotify.Write {
-					o.Emit(event)
+					o.handleEvent(event)
 				}
 			case err := <-o.watcher.Errors:
 				if err != nil {
-					o.Emit(err)
+					o.handleEvent(err)
 				}
 			}
 		}
 	}()
-
-	return nil
-}
-
-// Watch for file changes
-func (o *Observer) Watch(files []string) error {
-	// Init watcher on first call
-	if o.watcher == nil {
-		err := o.RunWatch()
-		if err != nil {
-			return err
-		}
-	}
-
-	// Add files to watch
-	for _, f := range files {
-		err := o.watcher.Add(f)
-		if err != nil {
-			return err
-		}
-	}
 
 	return nil
 }
