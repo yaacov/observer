@@ -43,9 +43,6 @@ func (o *Observer) Open() error {
 	o.quit = make(chan bool)
 	o.events = make(chan interface{})
 
-	// Init an empty listeners list
-	o.listeners = make([]Listener, 0)
-
 	// Run the observer
 	return o.eventLoop()
 }
