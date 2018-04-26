@@ -41,7 +41,7 @@ $ ./obs-example
 
 ### Emit string events
 
-(emit.go)[/examples/emit.go]
+[emit.go](/examples/emit.go)
 
 ``` go
 // Open an observer and start running
@@ -60,7 +60,7 @@ o.Emit("Hello")
 
 ### Watch files, emit file change events
 
-(file-watch.go)[/examples/file-watch.go]
+[file-watch.go](/examples/file-watch.go)
 
 ``` go
 // Open an observer and start watching for file modifications
