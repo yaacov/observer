@@ -28,7 +28,7 @@ import (
 // Listener is the function type to run on events.
 type Listener func(interface{})
 
-// Observer emplements the observer pattern
+// Observer emplements the observer pattern.
 type Observer struct {
 	quit          chan bool
 	events        chan interface{}
@@ -45,11 +45,11 @@ func (o *Observer) Open() error {
 		return fmt.Errorf("Observer already inititated.")
 	}
 
-	// Create the observer channels
+	// Create the observer channels.
 	o.quit = make(chan bool)
 	o.events = make(chan interface{})
 
-	// Run the observer
+	// Run the observer.
 	return o.eventLoop()
 }
 
@@ -58,15 +58,15 @@ func (o *Observer) Open() error {
 func (o *Observer) Close() error {
 	// Close event loop
 	if o.events != nil {
-		// Send a quit signal
+		// Send a quit signal.
 		o.quit <- true
 
-		// Close channels
+		// Close channels.
 		close(o.quit)
 		close(o.events)
 	}
 
-	// Close file watcher
+	// Close file watcher.
 	if o.watcher != nil {
 		o.watcher.Close()
 	}
@@ -92,7 +92,7 @@ func (o *Observer) Emit(event interface{}) {
 // Watch for file changes, watching a file can be done using exact file name,
 // or shell pattern matching.
 func (o *Observer) Watch(files []string) error {
-	// Init watcher on first call
+	// Init watcher on first call.
 	if o.watcher == nil {
 		err := o.watchLoop()
 		if err != nil {
@@ -100,11 +100,18 @@ func (o *Observer) Watch(files []string) error {
 		}
 	}
 
-	// Add files and dirs to watch list
+	// Add file patterns and dirs to watch list.
 	for _, f := range files {
+		// For example if file is '/home/.config/*.conf':
+		// base will be '*.conf'
+		// dir will be '/home/.config'
 		base := filepath.Base(f)
 		dir := filepath.Dir(f)
 
+		// We can not use the user provided file name here, because
+		// in cases where we have no directory with the file name, we
+		// do want to add the current directory './' before the base file
+		// name
 		o.watchPatterns.Add(dir + string(filepath.Separator) + base)
 		o.watchDirs.Add(dir)
 	}
@@ -127,17 +134,17 @@ func (o *Observer) Watch(files []string) error {
 	return nil
 }
 
-// handleEvent handle an event
+// handleEvent handle an event.
 func (o *Observer) handleEvent(event interface{}) {
-	// Run all listeners for this event
+	// Run all listeners for this event.
 	for _, listener := range o.listeners {
 		go listener(event)
 	}
 }
 
-// eventLoop runs the event loop
+// eventLoop runs the event loop.
 func (o *Observer) eventLoop() error {
-	// Run observer
+	// Run observer.
 	go func() {
 		for {
 			select {
@@ -171,7 +178,7 @@ func (o Observer) matchFile(f string) (match bool) {
 	return
 }
 
-// watchLoop runs a watcher loop for file changes
+// watchLoop runs a watcher loop for file changes.
 func (o *Observer) watchLoop() error {
 	var err error
 
@@ -180,13 +187,13 @@ func (o *Observer) watchLoop() error {
 		return err
 	}
 
-	// Listen for file/directory changes
+	// Listen for file/directory changes.
 	go func() {
 		for {
 			select {
 			case event := <-o.watcher.Events:
 				if event.Op&fsnotify.Write == fsnotify.Write {
-					// Check for event filename pattern match
+					// Check for event filename pattern match.
 					if o.matchFile(event.Name) {
 						o.handleEvent(event)
 					}
