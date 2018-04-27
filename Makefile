@@ -26,7 +26,7 @@ test-unit:
 
 .PHONY: install
 install: fmt observe
-	install -D -m0755 observe $(DESTDIR)$(BINDIR)/observe
+	install -D -m0755 observe $(DESTDIR)$(BINDIR)/observer
 
 .PHONY: vendor
 vendor:
