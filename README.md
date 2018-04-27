@@ -3,6 +3,7 @@
 Go event emitter and listener with builtin file watcher.
 
 [![Build Status](https://travis-ci.org/yaacov/observer.svg?branch=master)](https://travis-ci.org/yaacov/observer)
+[![GoDoc](https://godoc.org/github.com/yaacov/observer?status.svg)](https://godoc.org/github.com/yaacov/observer)
 
 ## Description
 
@@ -12,6 +13,8 @@ once an event is emited, all listener functions will be called.
 
 This observer also abstruct watching for file changes, users can register a list for files to watch,
 once a file is watched, events will be emitted automatically on each file modification.
+
+A common use cases are watching for changing in config files, and wating for code changes.
 
 This observer is using golang [channels](https://gobyexample.com/channels) for emiting events and [fsnotify](https://github.com/fsnotify/fsnotify) for watching file changes.
 
@@ -41,29 +44,19 @@ $ ./obs-example
 
 Watching file can be done using exact file name, or shell pattern matching.
 
-Example of watching for exact file names, in this example we will watch for
-modifications in this files:
+#### Watching for exact file names:
 ``` go
 Watch([]string{"./aws/config", "./aws/credentials"})
 ```
 
-Example of watching files using shell pattern matching, in this example we will watch for
-modifications in all files matching a shell pattern:
+#### Watching files using shell pattern matching:
 ``` go
 Watch([]string{"./kube/*.yml"})
 ```
 
-We can not expand tilde to home directory, '~/.config' will not work as expected.
+#### Note:
+We can not expand tilde to home directory, `~/.config` will not work as expected.
 If needed useres can use golang's [os/user/](https://golang.org/pkg/os/user/) package.
-
-#### Implementation note:
-Internally we are watching directories and not files, some text editors
-and automated configuration systems may use clone-delete-rename pattern
-to modify config files.
-When a files is watched by name and deleted, fsnotify will stop send
-notifications for this file.
-Watching a directory we will pick up the new file with the same name and
-continue to get notifications.
 
 ## Examples
 
