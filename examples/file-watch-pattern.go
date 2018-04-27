@@ -11,7 +11,7 @@ import (
 func main() {
 	// Open an observer and start watching for file modifications
 	o := observer.Observer{}
-	err := o.Watch([]string{"../LICENSE", "../README.md"})
+	err := o.Watch([]string{"*.go"})
 	if err != nil {
 		log.Fatal("Error: ", err)
 	}
@@ -23,6 +23,6 @@ func main() {
 	})
 
 	// Wait 10s for changes in file
-	log.Print("Observer is watching the \"../LICENSE\" and \"../README.md\" files.\n")
+	log.Print("Observer is watching \"*.go\" files.\n")
 	time.Sleep(12 * time.Second)
 }

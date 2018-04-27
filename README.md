@@ -98,6 +98,8 @@ o.AddListener(func(e interface{}) {
 })
 ```
 
+[file-watch-pattern.go](/examples/file-watch-pattern.go)
+
 ``` go
 // Open an observer and start watching for file matching shell pattern
 o := observer.Observer{}
