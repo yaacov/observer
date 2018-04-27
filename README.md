@@ -30,9 +30,17 @@ $ make
 $ ./observe
 ```
 
+## Install
+
+``` 
+go get -u github.com/yaacov/observer
+```
+
+Install using `go get` will install the package and the CLI tool _observe_
+
 ## CLI
 
-observe is a tool for watching files and executing shell commands on file modification, it is used to call
+_observe_ is a cli tool for watching files and executing shell commands on file modification, it is used to call
 an action on file change, examples of use can be restart and app when config file changes, recompile code when code updates and send image to server when image change.
 
 #### Get help:
