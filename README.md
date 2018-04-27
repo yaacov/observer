@@ -7,14 +7,13 @@ Go event emitter and listener with builtin file watcher.
 
 ## Description
 
-This observer emplements event emitter and listener pattern in go,
+This observer implements event emitter and listener pattern in go,
 the observer register a list of listener functions and implement an event emitter,
-once an event is emited, all listener functions will be called.
+once an event is emitted, all listener functions will be called.
 
-This observer also abstruct watching for file changes, users can register a list for files to watch,
+This observer also abstracts watching for file changes, users can register a list for files to watch,
 once a file is watched, events will be emitted automatically on each file modification.
-
-A common use cases are watching for changing in config files, and wating for code changes.
+Common use cases are watching for changing in config files, and wating for code changes.
 
 This observer is using golang [channels](https://gobyexample.com/channels) for emiting events and [fsnotify](https://github.com/fsnotify/fsnotify) for watching file changes.
 
@@ -42,7 +41,7 @@ $ ./obs-example
 
 ## Watching files for modifications
 
-Watching file can be done using exact file name, or shell pattern matching.
+Watching files can be done using exact file name, or shell pattern matching.
 
 #### Watching for exact file names:
 ``` go
@@ -56,7 +55,7 @@ Watch([]string{"./kube/*.yml"})
 
 #### Note:
 We can not expand tilde to home directory, `~/.config` will not work as expected.
-If needed useres can use golang's [os/user/](https://golang.org/pkg/os/user/) package.
+If needed users can use golang's [os/user/](https://golang.org/pkg/os/user/) package.
 
 ## Examples
 

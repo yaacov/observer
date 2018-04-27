@@ -13,7 +13,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package observer for events
+// Package observer implements an event emitter and listener with builtin file watcher.
 package observer
 
 import (
@@ -38,7 +38,8 @@ type Observer struct {
 	listeners     []Listener
 }
 
-// Open the observer channles and run observer loop
+// Open the observer channles and run the event loop,
+// it will return an error if event loop already running.
 func (o *Observer) Open() error {
 	if o.events != nil {
 		return fmt.Errorf("Observer already inititated.")
@@ -52,7 +53,8 @@ func (o *Observer) Open() error {
 	return o.eventLoop()
 }
 
-// Close the observer channles
+// Close the observer channles,
+// it will return an error if close fails.
 func (o *Observer) Close() error {
 	// Close event loop
 	if o.events != nil {
@@ -72,19 +74,23 @@ func (o *Observer) Close() error {
 	return nil
 }
 
-// AddListener adds a listener function to run on event.
+// AddListener adds a listener function to run on event,
+// the listener function will recive the event object as argument.
+// It will return an error if adding the new listener fails.
 func (o *Observer) AddListener(l Listener) error {
 	o.listeners = append(o.listeners, l)
 
 	return nil
 }
 
-// Emit an event
+// Emit an event, and event can be of any type, when event is triggered all
+// listeners will be called using the event object.
 func (o *Observer) Emit(event interface{}) {
 	o.events <- event
 }
 
-// Watch for file changes
+// Watch for file changes, watching a file can be done using exact file name,
+// or shell pattern matching.
 func (o *Observer) Watch(files []string) error {
 	// Init watcher on first call
 	if o.watcher == nil {
