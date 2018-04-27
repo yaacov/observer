@@ -35,7 +35,35 @@ $ ./obs-example
 | Close()                        | Close the observer channels       |
 | AddListener(callback Listener) | Add a listener function to run on event |
 | Emit(event interface{})        | Emit event                        |
-| Watch(files []string)          | Watch for file changes, and emit a file change events, file names can have   |
+| Watch(files []string)          | Watch for file changes, and emit a file change events |
+
+## Watching files for modifications
+
+Watching file can be done using exact file name, or shell pattern matching.
+
+Example of watching for exact file names, in this example we will watch for
+modifications in this files:
+``` go
+Watch([]string{"./aws/config", "./aws/credentials"})
+```
+
+Example of watching files using shell pattern matching, in this example we will watch for
+modifications in all files matching a shell pattern:
+``` go
+Watch([]string{"./kube/*.yml"})
+```
+
+We can not expand tilde to home directory, '~/.config' will not work as expected.
+If needed useres can use golang's [os/user/](https://golang.org/pkg/os/user/) package.
+
+#### Implementation note:
+Internally we are watching directories and not files, some text editors
+and automated configuration systems may use clone-delete-rename pattern
+to modify config files.
+When a files is watched by name and deleted, fsnotify will stop send
+notifications for this file.
+Watching a directory we will pick up the new file with the same name and
+continue to get notifications.
 
 ## Examples
 
@@ -69,7 +97,7 @@ Example of file watching and listener.
 ``` go
 // Open an observer and start watching for files by file name
 o := observer.Observer{}
-o.Watch([]string{"../LICENSE", "~/.kube/config"})
+o.Watch([]string{"../LICENSE"})
 defer o.Close()
 
 // Add a listener that logs events
