@@ -30,16 +30,6 @@ $ make
 $ ./obs-example
 ```
 
-## API
-
-| Method                         | Description                       |
-|--------------------------------|-----------------------------------|
-| Open()                         | Open the observer channels        |
-| Close()                        | Close the observer channels       |
-| AddListener(callback Listener) | Add a listener function to run on event |
-| Emit(event interface{})        | Emit event                        |
-| Watch(files []string)          | Watch for file changes, and emit a file change events |
-
 ## CLI
 
 observe is a tool for watching files and executing shell commands on file modification, it is used to call
@@ -54,6 +44,18 @@ observe -h
 ``` sh
 observe -r "curl -X POST http://127.0.0.1:8000/api/v1/-/restart" -w "/root/.aws/config"
 ```
+
+## API
+
+| Method                         | Description                       |
+|--------------------------------|-----------------------------------|
+| Open()                         | Open the observer channels        |
+| Close()                        | Close the observer channels       |
+| AddListener(callback Listener) | Add a listener function to run on event |
+| Emit(event interface{})        | Emit event                        |
+| Watch(files []string)          | Watch for file changes, and emit a file change events |
+
+
 
 ## Watching files for modifications
 
