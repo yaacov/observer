@@ -39,6 +39,21 @@ $ ./obs-example
 | Emit(event interface{})        | Emit event                        |
 | Watch(files []string)          | Watch for file changes, and emit a file change events |
 
+## CLI
+
+observe is a tool for watching files and executing shell commands on file modification, it is used to call
+an action on file change, examples of use can be restart and app when config file changes, recompile code when code updates and send image to server when image change.
+
+#### Get help:
+``` sh
+observe -h
+```
+
+#### Call a server api when config file chage:
+``` sh
+observe -r "curl -X POST http://127.0.0.1:8000/api/v1/-/restart" -w "/root/.aws/config"
+```
+
 ## Watching files for modifications
 
 Watching files can be done using exact file name, or shell pattern matching.
