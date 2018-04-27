@@ -61,7 +61,7 @@ func TestValues(t *testing.T) {
 
 	s.Add("hello")
 	s.Add("world")
-	values = s.Values()
+	values := s.Values()
 
 	if values[0] != "world" && values[1] != "world" {
 		t.Error("error getting Values from Set.")
