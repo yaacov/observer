@@ -35,7 +35,7 @@ $ ./obs-example
 | Close()                        | Close the observer channels       |
 | AddListener(callback Listener) | Add a listener function to run on event |
 | Emit(event interface{})        | Emit event                        |
-| Watch(files []string)          | Watch for file changes, and emit a file change events |
+| Watch(files []string)          | Watch for file changes, and emit a file change events, file names can have   |
 
 ## Examples
 
@@ -67,9 +67,21 @@ Example of file watching and listener.
 [file-watch.go](/examples/file-watch.go)
 
 ``` go
-// Open an observer and start watching for file modifications
+// Open an observer and start watching for files by file name
 o := observer.Observer{}
-o.Watch([]string{"../LICENSE", "../README.md"})
+o.Watch([]string{"../LICENSE", "~/.kube/config"})
+defer o.Close()
+
+// Add a listener that logs events
+o.AddListener(func(e interface{}) {
+  log.Printf("File modified: %v.\n", e)
+})
+```
+
+``` go
+// Open an observer and start watching for file matching shell pattern
+o := observer.Observer{}
+o.Watch([]string{"*.html", "css/*.scss"})
 defer o.Close()
 
 // Add a listener that logs events

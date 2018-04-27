@@ -13,41 +13,44 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package observer for events
-package observer
+// Package set for unique collection of strings.
+package set
 
 import (
 	"fmt"
 )
 
-// Set implements an array of unique strings
+// Set objects are collections of strings. A value in the Set may only occur once,
+// it is unique in the Set's collection.
 type Set struct {
 	set map[string]struct{}
 }
 
-// Add a new string value to the set
+// Add appends a new element with the given value to the Set object.
+// It returns an error if the value already in set.
 func (s *Set) Add(v string) error {
-	// Check for value exist
-	if _, ok := s.set[v]; ok {
-		return fmt.Errorf("Value already in set.")
-	}
-
-	// Check for empty set
+	// Init the set map if set is empty.
 	if s.set == nil {
 		s.set = make(map[string]struct{})
+	}
+
+	// Check for value exist.
+	if _, ok := s.set[v]; ok {
+		return fmt.Errorf("Value already in set.")
 	}
 
 	s.set[v] = struct{}{}
 	return nil
 }
 
-// Clear all values in the set
+// Clear removes all elements from the Set object.
 func (s *Set) Clear() {
 	s.set = nil
 }
 
-// Get set value as array of strings
-func (s Set) Get() (keys []string) {
+// Values returns a new list object that contains the values for each element
+// in the Set object.
+func (s Set) Values() (keys []string) {
 	keys = make([]string, 0, len(s.set))
 	for k := range s.set {
 		keys = append(keys, k)
@@ -56,7 +59,8 @@ func (s Set) Get() (keys []string) {
 	return
 }
 
-// Has check if set has a string
+// Has returns a boolean asserting whether an element is present with the
+// given value in the Set object or not.
 func (s Set) Has(v string) (ok bool) {
 	_, ok = s.set[v]
 

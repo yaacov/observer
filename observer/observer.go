@@ -21,6 +21,8 @@ import (
 	"path/filepath"
 
 	"github.com/fsnotify/fsnotify"
+
+	"github.com/yaacov/observer/observer/set"
 )
 
 // Listener is the function type to run on events.
@@ -28,12 +30,12 @@ type Listener func(interface{})
 
 // Observer emplements the observer pattern
 type Observer struct {
-	quit       chan bool
-	events     chan interface{}
-	watcher    *fsnotify.Watcher
-	watchFiles Set
-	watchDirs  Set
-	listeners  []Listener
+	quit          chan bool
+	events        chan interface{}
+	watcher       *fsnotify.Watcher
+	watchPatterns set.Set
+	watchDirs     set.Set
+	listeners     []Listener
 }
 
 // Open the observer channles and run observer loop
@@ -97,12 +99,19 @@ func (o *Observer) Watch(files []string) error {
 		base := filepath.Base(f)
 		dir := filepath.Dir(f)
 
-		o.watchFiles.Add(dir + string(filepath.Separator) + base)
+		o.watchPatterns.Add(dir + string(filepath.Separator) + base)
 		o.watchDirs.Add(dir)
 	}
 
-	// Watch all directories containing watch files
-	for _, d := range o.watchDirs.Get() {
+	// NOTE: We watch directories and not files.
+	//
+	// We are watching directories and not files, because some text editors
+	// and automated configuration systems may use clone-delete-rename pattern
+	// instead of editing config files inline.
+	// When a files is watched by name ane deleted, fsnotify will stop send
+	// notifications for this file, watching a directory we will pick up
+	// the new file with the same name and continue to get notifications.
+	for _, d := range o.watchDirs.Values() {
 		err := o.watcher.Add(d)
 		if err != nil {
 			return err
@@ -120,7 +129,7 @@ func (o *Observer) handleEvent(event interface{}) {
 	}
 }
 
-// eventLoop run the event loop
+// eventLoop runs the event loop
 func (o *Observer) eventLoop() error {
 	// Run observer
 	go func() {
@@ -137,7 +146,26 @@ func (o *Observer) eventLoop() error {
 	return nil
 }
 
-// watchLoop run a watcher for file changes
+// matchFile returns a boolean asserting whether this file is watched or not.
+func (o Observer) matchFile(f string) (match bool) {
+	// Look for an exact match.
+	match = o.watchPatterns.Has(f)
+	if match {
+		return
+	}
+
+	// Try to match shell file name pattern.
+	for _, p := range o.watchPatterns.Values() {
+		match, _ = filepath.Match(p, f)
+		if match {
+			return
+		}
+	}
+
+	return
+}
+
+// watchLoop runs a watcher loop for file changes
 func (o *Observer) watchLoop() error {
 	var err error
 
@@ -146,14 +174,14 @@ func (o *Observer) watchLoop() error {
 		return err
 	}
 
-	// Listen for file changes
+	// Listen for file/directory changes
 	go func() {
 		for {
 			select {
 			case event := <-o.watcher.Events:
 				if event.Op&fsnotify.Write == fsnotify.Write {
-					// Check if we watch the file
-					if o.watchFiles.Has(event.Name) {
+					// Check for event filename pattern match
+					if o.matchFile(event.Name) {
 						o.handleEvent(event)
 					}
 				}

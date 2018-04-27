@@ -36,7 +36,6 @@ func main() {
 	if err != nil {
 		log.Fatal("Error: ", err)
 	}
-	log.Print("Observer is watching LICENSE file, try to change it.\n")
 
 	// Add a listener that logs events
 	o.AddListener(func(e interface{}) {
@@ -55,5 +54,6 @@ func main() {
 	}()
 
 	// Wait for events
+	log.Print("Watching \"LICENSE\", try to change it.\n")
 	time.Sleep(10 * time.Second)
 }
