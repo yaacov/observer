@@ -27,7 +27,7 @@ This observer is using golang [channels](https://gobyexample.com/channels) for e
 $ go get -u github.com/golang/dep/cmd/dep
 $ make vendor
 $ make
-$ ./obs-example
+$ ./observe
 ```
 
 ## CLI
