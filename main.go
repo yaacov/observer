@@ -17,43 +17,62 @@
 package main
 
 import (
+	"flag"
 	"log"
-	"time"
+	"os"
+	"os/exec"
+	"os/signal"
+	"strings"
 
 	"github.com/yaacov/observer/observer"
 )
 
 func main() {
-	log.Print("Observer Example\n")
+	var err error
 
-	// Open observer and start running
+	// Parse cli arguments
+	watchPtr := flag.String("w", "./*", "space sperated list of files to watch.")
+	runPtr := flag.String("r", "./run.sh", "shell command to run.")
+	flag.Parse()
+
+	// Get watchFiles
+	watchFiles := strings.Split(*watchPtr, " ")
+
+	// Get command line to run on events
+	cmd := strings.Split(*runPtr, " ")
+
+	// Open observer and start watching
 	o := observer.Observer{}
-	o.Open()
 	defer o.Close()
 
-	// Watch for changes in LICENSE file
-	err := o.Watch([]string{"LICENSE"})
+	// Watch for changes in files
+	err = o.Watch(watchFiles)
 	if err != nil {
-		log.Fatal("Error: ", err)
+		log.Fatal("[Error] watch files: ", err)
 	}
 
-	// Add a listener that logs events
+	// Add a listener for events
 	o.AddListener(func(e interface{}) {
 		log.Printf("Received: %v.\n", e)
+
+		if len(cmd) == 1 {
+			err = exec.Command(cmd[0]).Run()
+		} else if len(cmd) > 1 {
+			err = exec.Command(cmd[0], cmd[1:]...).Run()
+		}
+
+		if err != nil {
+			log.Printf("[Error] running event listener: %s.\n", err)
+		}
 	})
 
-	// This events will be loged
-	go func() {
-		time.Sleep(2 * time.Second)
-		o.Emit("Holla")
-	}()
+	// Log watcher starting.
+	log.Print("Observer starting.")
+	log.Print("Press Ctrl+C to exit.")
 
-	go func() {
-		time.Sleep(1 * time.Second)
-		o.Emit("Hy")
-	}()
+	// Wait for Ctrl+C
+	waitCtrlC := make(chan os.Signal, 1)
+	signal.Notify(waitCtrlC, os.Interrupt)
 
-	// Wait for events
-	log.Print("Watching \"LICENSE\", try to change it.\n")
-	time.Sleep(10 * time.Second)
+	<-waitCtrlC
 }

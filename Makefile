@@ -2,10 +2,10 @@ PREFIX := $(GOPATH)
 BINDIR := $(PREFIX)/bin
 SOURCE := main.go observer/*.go observer/*/*.go examples/*.go
 
-all: fmt obs-example
+all: fmt observe
 
-obs-example: $(SOURCE)
-	go build -o obs-example main.go
+observe: $(SOURCE)
+	go build -o observe main.go
 
 .PHONY: fmt
 fmt: $(SOURCE)
@@ -17,7 +17,7 @@ lint: $(SOURCE)
 
 .PHONY: clean
 clean:
-	$(RM) obs-example
+	$(RM) observe
 
 .PHONY: test-unit
 test-unit:
@@ -25,8 +25,8 @@ test-unit:
 	@go test $(shell go list ./... | grep -v examples)
 
 .PHONY: install
-install: fmt observer
-	install -D -m0755 obs-example $(DESTDIR)$(BINDIR)/obs-example
+install: fmt observe
+	install -D -m0755 observe $(DESTDIR)$(BINDIR)/observe
 
 .PHONY: vendor
 vendor:
