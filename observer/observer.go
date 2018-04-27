@@ -111,7 +111,8 @@ func (o *Observer) Watch(files []string) error {
 		// We can not use the user provided file name here, because
 		// in cases where we have no directory with the file name, we
 		// do want to add the current directory './' before the base file
-		// name
+		// name. We can not use filepath.Join for the same reason, it will
+		// remove the './' prefix when cleaning filename.
 		o.watchPatterns.Add(dir + string(filepath.Separator) + base)
 		o.watchDirs.Add(dir)
 	}
