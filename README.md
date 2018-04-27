@@ -1,6 +1,6 @@
 # Observer
 
-Go event emitter and listener with builtin file watcher.
+Go event emitter and listener with builtin file watcher package.
 
 [![Build Status](https://travis-ci.org/yaacov/observer.svg?branch=master)](https://travis-ci.org/yaacov/observer)
 [![GoDoc](https://godoc.org/github.com/yaacov/observer?status.svg)](https://godoc.org/github.com/yaacov/observer)
