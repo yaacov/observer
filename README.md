@@ -36,23 +36,23 @@ $ ./observe
 go get -u github.com/yaacov/observer
 ```
 
-Install using `go get` will install the package and the CLI tool _observe_
+Install using `go get` will install the package and the CLI tool _observer_
 
 ## CLI
 
-_observe_ is a cli tool for watching files and executing shell commands on file modification, it is used to call
+_observer_ is a cli tool for watching files and executing shell commands on file modification, it is used to call
 an action on file change, examples of use can be restart and app when config file changes, recompile code when code updates and send image to server when image change.
 
 [inotify-tools](https://github.com/rvoicilas/inotify-tools/wiki), are a set of linux tools that monitor files for changes, they may be better choice for file monitoring on more complex cases.
 
 #### Get help:
 ``` sh
-observe -h
+observer -h
 ```
 
 #### Call a server api when config file chage:
 ``` sh
-observe -r "curl -X POST http://127.0.0.1:8000/api/v1/-/restart" -w "/root/.aws/config"
+observer -r "curl -X POST http://127.0.0.1:8000/api/v1/-/restart" -w "/root/.aws/config"
 ```
 
 ## API
