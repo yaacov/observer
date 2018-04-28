@@ -212,7 +212,7 @@ func (o *Observer) watchLoop() error {
 			case event := <-o.watcher.Events:
 				// Logging all events
 				if o.Verbose {
-					log.Printf("[Debug] Recived event: %v", event)
+					log.Printf("[Debug] Received event: %v", event)
 				}
 
 				if event.Op&fsnotify.Write == fsnotify.Write {
