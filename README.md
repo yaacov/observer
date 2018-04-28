@@ -6,6 +6,24 @@ Go event emitter and listener with builtin file watcher package.
 [![Build Status](https://travis-ci.org/yaacov/observer.svg?branch=master)](https://travis-ci.org/yaacov/observer)
 [![GoDoc](https://godoc.org/github.com/yaacov/observer?status.svg)](https://godoc.org/github.com/yaacov/observer)
 
+#### Code snippets
+
+``` go
+// Create a new observer
+o := observer.Observer{}
+o.Open()
+
+// Register a listener method.
+o.AddListener(func(e interface{}) {
+  log.Printf("Received: %v.\n", e)
+})
+
+// Emit an event.
+o.Emit("Hello")
+
+// Watch and emit events on file modifications.
+o.Watch([]string{"*.html", "css/*.scss"})
+```
 ## Description
 
 This observer implements event emitter and listener pattern in go,
