@@ -19,7 +19,7 @@ func main() {
 
 	// Add a listener that logs events
 	o.AddListener(func(e interface{}) {
-		log.Printf("File modified: %v.\n", e)
+		log.Printf("File modified: %v.\n", e.(observer.WatchEvent))
 	})
 
 	// Wait 10s for changes in file

@@ -32,7 +32,7 @@ $ ./observe
 
 ## Install
 
-``` 
+```
 go get -u github.com/yaacov/observer
 ```
 
@@ -122,7 +122,8 @@ defer o.Close()
 
 // Add a listener that logs events
 o.AddListener(func(e interface{}) {
-  log.Printf("File modified: %v.\n", e)
+  watchEvent := e.(observer.WatchEvent)
+  log.Printf("File modified: %s.\n", e.Name)
 })
 ```
 
