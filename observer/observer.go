@@ -18,6 +18,7 @@ package observer
 
 import (
 	"fmt"
+	"log"
 	"path/filepath"
 
 	"github.com/fsnotify/fsnotify"
@@ -36,6 +37,7 @@ type Observer struct {
 	watchPatterns set.Set
 	watchDirs     set.Set
 	listeners     []Listener
+	Verbose       bool
 }
 
 // Open the observer channles and run the event loop,
@@ -108,12 +110,19 @@ func (o *Observer) Watch(files []string) error {
 		base := filepath.Base(f)
 		dir := filepath.Dir(f)
 
+		// Pattern calculation does not allways equal f from user.
 		// We can not use the user provided file name here, because
 		// in cases where we have no directory with the file name, we
 		// do want to add the current directory './' before the base file
 		// name. We can not use filepath.Join for the same reason, it will
 		// remove the './' prefix when cleaning filename.
-		o.watchPatterns.Add(dir + string(filepath.Separator) + base)
+		pattern := fmt.Sprintf("%s%s%s", dir, string(filepath.Separator), base)
+
+		// Logging file patterns
+		if o.Verbose {
+			log.Printf("[Debug] Adding pattern: %s", pattern)
+		}
+		o.watchPatterns.Add(pattern)
 		o.watchDirs.Add(dir)
 	}
 
@@ -129,6 +138,11 @@ func (o *Observer) Watch(files []string) error {
 		err := o.watcher.Add(d)
 		if err != nil {
 			return err
+		}
+
+		// Logging watched directories
+		if o.Verbose {
+			log.Printf("[Debug] Watching dir: %s", d)
 		}
 	}
 
@@ -193,6 +207,11 @@ func (o *Observer) watchLoop() error {
 		for {
 			select {
 			case event := <-o.watcher.Events:
+				// Logging all events
+				if o.Verbose {
+					log.Printf("[Debug] Recived event: %v", event)
+				}
+
 				if event.Op&fsnotify.Write == fsnotify.Write {
 					// Check for event filename pattern match.
 					if o.matchFile(event.Name) {

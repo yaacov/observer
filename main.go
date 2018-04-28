@@ -33,6 +33,7 @@ func main() {
 	// Parse cli arguments
 	watchPtr := flag.String("w", "./*", "space sperated list of files to watch.")
 	runPtr := flag.String("r", "./run.sh", "shell command to run.")
+	verbosePtr := flag.Bool("V", false, "dump debug data.")
 	flag.Parse()
 
 	// Get watchFiles
@@ -43,6 +44,8 @@ func main() {
 
 	// Open observer and start watching
 	o := observer.Observer{}
+	o.Verbose = *verbosePtr
+
 	defer o.Close()
 
 	// Watch for changes in files
