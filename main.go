@@ -56,7 +56,8 @@ func main() {
 
 	// Add a listener for events
 	o.AddListener(func(e interface{}) {
-		log.Printf("Received: %v.\n", e)
+		we := e.(observer.WatchEvent)
+		log.Printf("Received: %s [%s].\n", we.Name, we.Op.String())
 
 		if len(cmd) == 1 {
 			err = exec.Command(cmd[0]).Run()

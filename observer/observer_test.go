@@ -17,6 +17,9 @@
 package observer
 
 import (
+	"io/ioutil"
+	"os"
+	"path/filepath"
 	"testing"
 )
 
@@ -87,5 +90,41 @@ func TestEmit(t *testing.T) {
 
 	if output != "done" {
 		t.Error("error Emitting strings.")
+	}
+}
+
+func TestWatch(t *testing.T) {
+	var output string
+	var o Observer
+
+	done := make(chan bool)
+	defer close(done)
+
+	// Create a temporary dir and files
+	content := []byte("temporary content")
+	dir, err := ioutil.TempDir("", "tests")
+	if err != nil {
+		t.Error("error create temp dir.")
+	}
+	defer os.RemoveAll(dir) // clean up
+	tmpfn := filepath.Join(dir, "test_watch.txt")
+
+	// watch temporary dir
+	o.Watch([]string{tmpfn})
+	defer o.Close()
+
+	o.AddListener(func(e interface{}) {
+		output = e.(WatchEvent).Name
+		done <- true
+	})
+
+	if err := ioutil.WriteFile(tmpfn, content, 0666); err != nil {
+		t.Error("error writing to temp file.")
+	}
+
+	<-done // blocks until listener is triggered
+
+	if output != tmpfn {
+		t.Error("error watching files.")
 	}
 }

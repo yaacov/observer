@@ -26,6 +26,9 @@ import (
 	"github.com/yaacov/observer/observer/set"
 )
 
+// WatchEvent (fsnotify.Event) represents a single file system notification.
+type WatchEvent fsnotify.Event
+
 // Listener is the function type to run on events.
 type Listener func(interface{})
 
@@ -215,7 +218,7 @@ func (o *Observer) watchLoop() error {
 				if event.Op&fsnotify.Write == fsnotify.Write {
 					// Check for event filename pattern match.
 					if o.matchFile(event.Name) {
-						o.handleEvent(event)
+						o.handleEvent(WatchEvent(event))
 					}
 				}
 			case err := <-o.watcher.Errors:
