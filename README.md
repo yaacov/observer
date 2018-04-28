@@ -2,6 +2,7 @@
 
 Go event emitter and listener with builtin file watcher package.
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/yaacov/observer)](https://goreportcard.com/report/github.com/yaacov/observer)
 [![Build Status](https://travis-ci.org/yaacov/observer.svg?branch=master)](https://travis-ci.org/yaacov/observer)
 [![GoDoc](https://godoc.org/github.com/yaacov/observer?status.svg)](https://godoc.org/github.com/yaacov/observer)
 
