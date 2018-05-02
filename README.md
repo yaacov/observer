@@ -169,6 +169,8 @@ o.AddListener(func(e interface{}) {
 
 ### Group events by time, event groups will be sent once as an array of events.
 
+[emit-buffered.go](/examples/emit-buffered.go)
+
 ``` go
 o.Open()
 o.SetBufferDuration(1 * time.Second)

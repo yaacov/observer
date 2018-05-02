@@ -19,10 +19,10 @@ func main() {
 
 	// Add a listener that logs events
 	o.AddListener(func(e interface{}) {
-		log.Printf("Received: %v.\n", e.([]interface{}))
+		log.Printf("Received: %v.\n", e)
 	})
 
-	// This event will be buffered for 2 Sec
+	// This event will be buffered for 2 sec
 	go func() {
 		o.Emit("Holla")
 		o.Emit("Ciao")
