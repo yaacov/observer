@@ -167,7 +167,7 @@ o.AddListener(func(e interface{}) {
 })
 ```
 
-### Buffern event groups
+### Group events by time, event groups will be sent once as array of events.
 
 ``` go
 o.Open()
