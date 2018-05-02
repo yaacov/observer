@@ -21,6 +21,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 )
 
 func TestOpen(t *testing.T) {
@@ -126,5 +127,34 @@ func TestWatch(t *testing.T) {
 
 	if output != tmpfn {
 		t.Error("error watching files.")
+	}
+}
+
+func TestSetBufferDuration(t *testing.T) {
+	var output []interface{}
+	var o Observer
+
+	o.Open()
+	defer o.Close()
+
+	done := make(chan bool)
+	defer close(done)
+
+	o.SetBufferDuration(1 * time.Second)
+
+	o.AddListener(func(e interface{}) {
+		output = e.([]interface{})
+		done <- true
+	})
+
+	o.Emit("done")
+	o.Emit("done")
+	o.Emit("done")
+	o.Emit("done")
+
+	<-done // blocks until listener is triggered
+
+	if len(output) != 4 {
+		t.Error("error SetBufferDuration.")
 	}
 }
