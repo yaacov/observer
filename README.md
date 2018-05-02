@@ -85,7 +85,7 @@ See [examples](#examples-1) for usage examples.
 | AddListener(callback Listener) | Add a listener function to run on event |
 | Emit(event interface{})        | Emit event                        |
 | Watch(files []string)          | Watch for file changes, and emit a file change events |
-| SetBufferDuration(time.Time)   | Set the event buffer damping duration |
+| SetBufferDuration(d time.Duration)   | Set the event buffer damping duration |
 
 | Type                           |                                   | Description |
 |--------------------------------|-----------------------------------|-------------|
@@ -167,7 +167,7 @@ o.AddListener(func(e interface{}) {
 })
 ```
 
-### Group events by time, event groups will be sent once as array of events.
+### Group events by time, event groups will be sent once as an array of events.
 
 ``` go
 o.Open()
@@ -177,7 +177,7 @@ o.AddListener(func(e interface{}) {
 	output = e.([]interface{}) // => ["done", "done", "done", "done"]
 })
 
-// All this events will grouped together, and sent only once to the listener.
+// All this events will be grouped together, and sent only once to the listener.
 o.Emit("done")
 o.Emit("done")
 o.Emit("done")
