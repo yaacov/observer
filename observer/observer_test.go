@@ -140,12 +140,21 @@ func TestSetBufferDuration(t *testing.T) {
 	done := make(chan bool)
 	defer close(done)
 
-	o.SetBufferDuration(1 * time.Second)
+	o.SetBufferDuration(50000 * time.Nanosecond)
 
 	o.AddListener(func(e interface{}) {
 		output = e.([]interface{})
 		done <- true
 	})
+
+	o.Emit("done")
+	o.Emit("done")
+
+	<-done // blocks until listener is triggered
+
+	if len(output) != 2 {
+		t.Error("error sending 2 buffered events.")
+	}
 
 	o.Emit("done")
 	o.Emit("done")
@@ -155,6 +164,6 @@ func TestSetBufferDuration(t *testing.T) {
 	<-done // blocks until listener is triggered
 
 	if len(output) != 4 {
-		t.Error("error SetBufferDuration.")
+		t.Error("error sending 4 buffered events.")
 	}
 }

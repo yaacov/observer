@@ -45,7 +45,7 @@ type Observer struct {
 	bufferEvents   []interface{}
 	bufferDuration time.Duration
 	bufferTimer    *time.Timer
-	bufferMux      *sync.Mutex
+	bufferMutex    *sync.Mutex
 	Verbose        bool
 }
 
@@ -161,8 +161,8 @@ func (o *Observer) Watch(files []string) error {
 // SetBufferDuration set the buffer damping duration
 func (o *Observer) SetBufferDuration(d time.Duration) {
 	// Create the buffer mutex, if missing.
-	if o.bufferMux == nil {
-		o.bufferMux = &sync.Mutex{}
+	if o.bufferMutex == nil {
+		o.bufferMutex = &sync.Mutex{}
 	}
 
 	// Set the buffer duration.
@@ -184,29 +184,29 @@ func (o *Observer) handleEvent(event interface{}) {
 		return
 	}
 
+	// Lock this function.
+	o.bufferMutex.Lock()
+	defer o.bufferMutex.Unlock()
+
 	// Add new event to the event buffer
-	o.bufferMux.Lock()
 	o.bufferEvents = append(o.bufferEvents, event)
-	o.bufferMux.Unlock()
 
 	// If this is the first event, set a timeout function.
 	if o.bufferTimer == nil {
 		o.bufferTimer = time.AfterFunc(o.bufferDuration, func() {
 			// Run all listeners for this event.
-			o.bufferMux.Lock()
+			o.bufferMutex.Lock()
 
 			// Send event buffer
 			o.sendEvent(o.bufferEvents)
 
 			// Reset events buffer
 			o.bufferTimer = nil
-			o.bufferEvents = make([]interface{}, 1)
+			o.bufferEvents = make([]interface{}, 0)
 
-			o.bufferMux.Unlock()
+			o.bufferMutex.Unlock()
 		})
 	}
-
-	return
 }
 
 // eventLoop runs the event loop.
