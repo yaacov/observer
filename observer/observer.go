@@ -20,6 +20,8 @@ import (
 	"fmt"
 	"log"
 	"path/filepath"
+	"sync"
+	"time"
 
 	"github.com/fsnotify/fsnotify"
 
@@ -34,13 +36,17 @@ type Listener func(interface{})
 
 // Observer emplements the observer pattern.
 type Observer struct {
-	quit          chan bool
-	events        chan interface{}
-	watcher       *fsnotify.Watcher
-	watchPatterns set.Set
-	watchDirs     set.Set
-	listeners     []Listener
-	Verbose       bool
+	quit           chan bool
+	events         chan interface{}
+	watcher        *fsnotify.Watcher
+	watchPatterns  set.Set
+	watchDirs      set.Set
+	listeners      []Listener
+	bufferEvents   []interface{}
+	bufferDuration time.Duration
+	bufferTimer    *time.Timer
+	bufferMutex    *sync.Mutex
+	Verbose        bool
 }
 
 // Open the observer channles and run the event loop,
@@ -143,7 +149,7 @@ func (o *Observer) Watch(files []string) error {
 			return err
 		}
 
-		// Logging watched directories
+		// Logging watched directories.
 		if o.Verbose {
 			log.Printf("[Debug] Watching dir: %s", d)
 		}
@@ -152,11 +158,53 @@ func (o *Observer) Watch(files []string) error {
 	return nil
 }
 
-// handleEvent handle an event.
-func (o *Observer) handleEvent(event interface{}) {
-	// Run all listeners for this event.
+// SetBufferDuration set the buffer damping duration
+func (o *Observer) SetBufferDuration(d time.Duration) {
+	// Create the buffer mutex, if missing.
+	if o.bufferMutex == nil {
+		o.bufferMutex = &sync.Mutex{}
+	}
+
+	// Set the buffer duration.
+	o.bufferDuration = d
+}
+
+// sendEvent send one or more events to the observer listeners.
+func (o *Observer) sendEvent(event interface{}) {
 	for _, listener := range o.listeners {
 		go listener(event)
+	}
+}
+
+// handleEvent handle an event.
+func (o *Observer) handleEvent(event interface{}) {
+	// If we do not buffer events, just send this event now.
+	if o.bufferDuration == 0 {
+		o.sendEvent(event)
+		return
+	}
+
+	// Lock this function.
+	o.bufferMutex.Lock()
+	defer o.bufferMutex.Unlock()
+
+	// Add new event to the event buffer
+	o.bufferEvents = append(o.bufferEvents, event)
+
+	// If this is the first event, set a timeout function.
+	if o.bufferTimer == nil {
+		o.bufferTimer = time.AfterFunc(o.bufferDuration, func() {
+			// Lock this function.
+			o.bufferMutex.Lock()
+			defer o.bufferMutex.Unlock()
+
+			// Send all events in event buffer
+			o.sendEvent(o.bufferEvents)
+
+			// Reset events buffer
+			o.bufferTimer = nil
+			o.bufferEvents = make([]interface{}, 0)
+		})
 	}
 }
 
