@@ -85,6 +85,7 @@ See [examples](#examples-1) for usage examples.
 | AddListener(callback Listener) | Add a listener function to run on event |
 | Emit(event interface{})        | Emit event                        |
 | Watch(files []string)          | Watch for file changes, and emit a file change events |
+| SetBufferDuration(time.Time)   | Set a buffer time to buffer event groups |
 
 | Type                           |                                   | Description |
 |--------------------------------|-----------------------------------|-------------|
@@ -164,4 +165,21 @@ defer o.Close()
 o.AddListener(func(e interface{}) {
   log.Printf("File modified: %v.\n", e)
 })
+```
+
+### Buffern event groups
+
+``` go
+o.Open()
+o.SetBufferDuration(1 * time.Second)
+
+o.AddListener(func(e interface{}) {
+	output = e.([]interface{}) // => ["done", "done", "done", "done"]
+})
+
+// All this events will grouped together and sent only once to the listener.
+o.Emit("done")
+o.Emit("done")
+o.Emit("done")
+o.Emit("done")
 ```
