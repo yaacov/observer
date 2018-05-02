@@ -44,7 +44,6 @@ type Observer struct {
 	listeners      []Listener
 	bufferEvents   []interface{}
 	bufferDuration time.Duration
-	bufferTimer    *time.Timer
 	bufferMutex    *sync.Mutex
 	Verbose        bool
 }
@@ -158,7 +157,7 @@ func (o *Observer) Watch(files []string) error {
 	return nil
 }
 
-// SetBufferDuration set the buffer damping duration
+// SetBufferDuration set the event buffer damping duration
 func (o *Observer) SetBufferDuration(d time.Duration) {
 	// Create the buffer mutex, if missing.
 	if o.bufferMutex == nil {
@@ -192,8 +191,8 @@ func (o *Observer) handleEvent(event interface{}) {
 	o.bufferEvents = append(o.bufferEvents, event)
 
 	// If this is the first event, set a timeout function.
-	if o.bufferTimer == nil {
-		o.bufferTimer = time.AfterFunc(o.bufferDuration, func() {
+	if len(o.bufferEvents) == 1 {
+		time.AfterFunc(o.bufferDuration, func() {
 			// Lock this function.
 			o.bufferMutex.Lock()
 			defer o.bufferMutex.Unlock()
@@ -202,7 +201,6 @@ func (o *Observer) handleEvent(event interface{}) {
 			o.sendEvent(o.bufferEvents)
 
 			// Reset events buffer
-			o.bufferTimer = nil
 			o.bufferEvents = make([]interface{}, 0)
 		})
 	}
