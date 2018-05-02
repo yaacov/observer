@@ -194,17 +194,16 @@ func (o *Observer) handleEvent(event interface{}) {
 	// If this is the first event, set a timeout function.
 	if o.bufferTimer == nil {
 		o.bufferTimer = time.AfterFunc(o.bufferDuration, func() {
-			// Run all listeners for this event.
+			// Lock this function.
 			o.bufferMutex.Lock()
+			defer o.bufferMutex.Unlock()
 
-			// Send event buffer
+			// Send all events in event buffer
 			o.sendEvent(o.bufferEvents)
 
 			// Reset events buffer
 			o.bufferTimer = nil
 			o.bufferEvents = make([]interface{}, 0)
-
-			o.bufferMutex.Unlock()
 		})
 	}
 }
