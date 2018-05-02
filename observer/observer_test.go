@@ -140,7 +140,7 @@ func TestSetBufferDuration(t *testing.T) {
 	done := make(chan bool)
 	defer close(done)
 
-	o.SetBufferDuration(250000 * time.Nanosecond)
+	o.SetBufferDuration(1 * time.Second)
 
 	o.AddListener(func(e interface{}) {
 		output = e.([]interface{})
