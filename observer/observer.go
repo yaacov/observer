@@ -126,7 +126,7 @@ func (o *Observer) Watch(files []string) error {
 		// remove the './' prefix when cleaning filename.
 		pattern := fmt.Sprintf("%s%s%s", dir, string(filepath.Separator), base)
 
-		// Logging file patterns
+		// Logging file patterns.
 		if o.Verbose {
 			log.Printf("[Debug] Adding pattern: %s", pattern)
 		}
@@ -157,7 +157,7 @@ func (o *Observer) Watch(files []string) error {
 	return nil
 }
 
-// SetBufferDuration set the event buffer damping duration
+// SetBufferDuration set the event buffer damping duration.
 func (o *Observer) SetBufferDuration(d time.Duration) {
 	// Create the buffer mutex, if missing.
 	if o.bufferMutex == nil {
@@ -187,7 +187,7 @@ func (o *Observer) handleEvent(event interface{}) {
 	o.bufferMutex.Lock()
 	defer o.bufferMutex.Unlock()
 
-	// Add new event to the event buffer
+	// Add new event to the event buffer.
 	o.bufferEvents = append(o.bufferEvents, event)
 
 	// If this is the first event, set a timeout function.
@@ -197,10 +197,10 @@ func (o *Observer) handleEvent(event interface{}) {
 			o.bufferMutex.Lock()
 			defer o.bufferMutex.Unlock()
 
-			// Send all events in event buffer
+			// Send all events in event buffer.
 			o.sendEvent(o.bufferEvents)
 
-			// Reset events buffer
+			// Reset events buffer.
 			o.bufferEvents = make([]interface{}, 0)
 		})
 	}

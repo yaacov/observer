@@ -177,7 +177,7 @@ o.AddListener(func(e interface{}) {
 	output = e.([]interface{}) // => ["done", "done", "done", "done"]
 })
 
-// All this events will grouped together and sent only once to the listener.
+// All this events will grouped together, and sent only once to the listener.
 o.Emit("done")
 o.Emit("done")
 o.Emit("done")
