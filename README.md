@@ -85,7 +85,7 @@ See [examples](#examples-1) for usage examples.
 | AddListener(callback Listener) | Add a listener function to run on event |
 | Emit(event interface{})        | Emit event                        |
 | Watch(files []string)          | Watch for file changes, and emit a file change events |
-| SetBufferDuration(time.Time)   | Set a buffer time to buffer event groups |
+| SetBufferDuration(time.Time)   | Set the event buffer damping duration |
 
 | Type                           |                                   | Description |
 |--------------------------------|-----------------------------------|-------------|
