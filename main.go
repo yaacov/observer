@@ -34,7 +34,7 @@ func main() {
 	// Parse cli arguments.
 	watchPtr := flag.String("w", "./*", "space sperated list of files to watch.")
 	runPtr := flag.String("r", "./run.sh", "shell command to run.")
-	dampingSec := flag.Int("d", 0, "event damping time in sec.")
+	dampingSecPtr := flag.Int("d", 0, "event damping time in sec.")
 	verbosePtr := flag.Bool("V", false, "dump debug data.")
 	flag.Parse()
 
@@ -49,8 +49,9 @@ func main() {
 	o.Verbose = *verbosePtr
 
 	// Set damping time if requested.
-	if dampingSec != 0 {
-		o.SetBufferDuration(dampingSec * time.Seconde)
+	if *dampingSecPtr != 0 {
+		sec := time.Duration(*dampingSecPtr) * time.Second
+		o.SetBufferDuration(sec)
 	}
 
 	defer o.Close()
@@ -63,8 +64,7 @@ func main() {
 
 	// Add a listener for events.
 	o.AddListener(func(e interface{}) {
-		we := e.(observer.WatchEvent)
-		log.Printf("Received: %s [%s].\n", we.Name, we.Op.String())
+		log.Printf("Received: %v].\n", e)
 
 		if len(cmd) == 1 {
 			err = exec.Command(cmd[0]).Run()

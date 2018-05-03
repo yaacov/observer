@@ -86,11 +86,8 @@ func (o *Observer) Close() error {
 
 // AddListener adds a listener function to run on event,
 // the listener function will recive the event object as argument.
-// It will return an error if adding the new listener fails.
-func (o *Observer) AddListener(l Listener) error {
+func (o *Observer) AddListener(l Listener) {
 	o.listeners = append(o.listeners, l)
-
-	return nil
 }
 
 // Emit an event, and event can be of any type, when event is triggered all
