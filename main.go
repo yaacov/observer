@@ -23,6 +23,7 @@ import (
 	"os/exec"
 	"os/signal"
 	"strings"
+	"time"
 
 	"github.com/yaacov/observer/observer"
 )
@@ -30,31 +31,37 @@ import (
 func main() {
 	var err error
 
-	// Parse cli arguments
+	// Parse cli arguments.
 	watchPtr := flag.String("w", "./*", "space sperated list of files to watch.")
 	runPtr := flag.String("r", "./run.sh", "shell command to run.")
+	dampingSec := flag.Int("d", 0, "event damping time in sec.")
 	verbosePtr := flag.Bool("V", false, "dump debug data.")
 	flag.Parse()
 
-	// Get watchFiles
+	// Get watchFiles.
 	watchFiles := strings.Split(*watchPtr, " ")
 
-	// Get command line to run on events
+	// Get command line to run on events.
 	cmd := strings.Split(*runPtr, " ")
 
-	// Open observer and start watching
+	// Open observer and start watching.
 	o := observer.Observer{}
 	o.Verbose = *verbosePtr
 
+	// Set damping time if requested.
+	if dampingSec != 0 {
+		o.SetBufferDuration(dampingSec * time.Seconde)
+	}
+
 	defer o.Close()
 
-	// Watch for changes in files
+	// Watch for changes in files.
 	err = o.Watch(watchFiles)
 	if err != nil {
 		log.Fatal("[Error] watch files: ", err)
 	}
 
-	// Add a listener for events
+	// Add a listener for events.
 	o.AddListener(func(e interface{}) {
 		we := e.(observer.WatchEvent)
 		log.Printf("Received: %s [%s].\n", we.Name, we.Op.String())
@@ -74,7 +81,7 @@ func main() {
 	log.Print("Observer starting.")
 	log.Print("Press Ctrl+C to exit.")
 
-	// Wait for Ctrl+C
+	// Wait for Ctrl+C.
 	waitCtrlC := make(chan os.Signal, 1)
 	signal.Notify(waitCtrlC, os.Interrupt)
 
