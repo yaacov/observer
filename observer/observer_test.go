@@ -56,17 +56,26 @@ func TestClose(t *testing.T) {
 }
 
 func TestAddListener(t *testing.T) {
-	var err error
+	var output string
 	var o Observer
 
 	o.Open()
 	defer o.Close()
 
-	err = o.AddListener(func(e interface{}) {
-		// Do nothing
+	done := make(chan bool)
+	defer close(done)
+
+	o.AddListener(func(e interface{}) {
+		output = e.(string)
+		done <- true
 	})
-	if err != nil {
-		t.Error("error Adding a litner.")
+
+	o.Emit("done")
+
+	<-done // blocks until listener is triggered
+
+	if output != "done" {
+		t.Error("error Emitting strings.")
 	}
 }
 
