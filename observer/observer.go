@@ -42,9 +42,10 @@ type Observer struct {
 	watchPatterns  set.Set
 	watchDirs      set.Set
 	listeners      []Listener
+	listenersMutex sync.Mutex
 	bufferEvents   []interface{}
 	bufferDuration time.Duration
-	bufferMutex    *sync.Mutex
+	bufferMutex    sync.Mutex
 	Verbose        bool
 }
 
@@ -87,6 +88,10 @@ func (o *Observer) Close() error {
 // AddListener adds a listener function to run on event,
 // the listener function will recive the event object as argument.
 func (o *Observer) AddListener(l Listener) {
+	// Lock this function
+	o.listenersMutex.Lock()
+	defer o.listenersMutex.Unlock()
+
 	o.listeners = append(o.listeners, l)
 }
 
@@ -156,17 +161,16 @@ func (o *Observer) Watch(files []string) error {
 
 // SetBufferDuration set the event buffer damping duration.
 func (o *Observer) SetBufferDuration(d time.Duration) {
-	// Create the buffer mutex, if missing.
-	if o.bufferMutex == nil {
-		o.bufferMutex = &sync.Mutex{}
-	}
-
 	// Set the buffer duration.
 	o.bufferDuration = d
 }
 
 // sendEvent send one or more events to the observer listeners.
 func (o *Observer) sendEvent(event interface{}) {
+	// Lock this function
+	o.listenersMutex.Lock()
+	defer o.listenersMutex.Unlock()
+
 	for _, listener := range o.listeners {
 		go listener(event)
 	}
