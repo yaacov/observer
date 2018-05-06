@@ -167,17 +167,22 @@ func (o *Observer) SetBufferDuration(d time.Duration) {
 
 // sendEvent send one or more events to the observer listeners.
 func (o *Observer) sendEvent(event interface{}) {
-	// Lock this function
-	o.listenersMutex.Lock()
-	defer o.listenersMutex.Unlock()
-
 	for _, listener := range o.listeners {
 		go listener(event)
 	}
 }
 
 // handleEvent handle an event.
-func (o *Observer) handleEvent(event interface{}) {
+func (o *Observer) handleEvent(event interface{}, f *string) {
+	// Lock function
+	o.listenersMutex.Lock()
+	defer o.listenersMutex.Unlock()
+
+	// Check for file name match, nil is match all.
+	if !o.matchFile(f) {
+		return
+	}
+
 	// If we do not buffer events, just send this event now.
 	if o.bufferDuration == 0 {
 		o.sendEvent(event)
@@ -214,7 +219,7 @@ func (o *Observer) eventLoop() error {
 		for {
 			select {
 			case event := <-o.events:
-				o.handleEvent(event)
+				o.handleEvent(event, nil)
 			case <-o.quit:
 				return
 			}
@@ -225,16 +230,23 @@ func (o *Observer) eventLoop() error {
 }
 
 // matchFile returns a boolean asserting whether this file is watched or not.
-func (o Observer) matchFile(f string) (match bool) {
+func (o Observer) matchFile(f *string) (match bool) {
+	// If no file, return true.
+	if f == nil {
+		match = true
+
+		return
+	}
+
 	// Look for an exact match.
-	match = o.watchPatterns.Has(f)
+	match = o.watchPatterns.Has(*f)
 	if match {
 		return
 	}
 
 	// Try to match shell file name pattern.
 	for _, p := range o.watchPatterns.Values() {
-		match, _ = filepath.Match(p, f)
+		match, _ = filepath.Match(p, *f)
 		if match {
 			return
 		}
@@ -264,13 +276,11 @@ func (o *Observer) watchLoop() error {
 
 				if event.Op&fsnotify.Write == fsnotify.Write {
 					// Check for event filename pattern match.
-					if o.matchFile(event.Name) {
-						o.handleEvent(WatchEvent(event))
-					}
+					o.handleEvent(WatchEvent(event), &event.Name)
 				}
 			case err := <-o.watcher.Errors:
 				if err != nil {
-					o.handleEvent(err)
+					o.handleEvent(err, nil)
 				}
 			}
 		}
