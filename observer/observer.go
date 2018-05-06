@@ -45,7 +45,6 @@ type Observer struct {
 	listenersMutex sync.Mutex
 	bufferEvents   []interface{}
 	bufferDuration time.Duration
-	bufferMutex    sync.Mutex
 	Verbose        bool
 }
 
@@ -189,19 +188,15 @@ func (o *Observer) handleEvent(event interface{}, f *string) {
 		return
 	}
 
-	// Lock this function.
-	o.bufferMutex.Lock()
-	defer o.bufferMutex.Unlock()
-
 	// Add new event to the event buffer.
 	o.bufferEvents = append(o.bufferEvents, event)
 
 	// If this is the first event, set a timeout function.
 	if len(o.bufferEvents) == 1 {
 		time.AfterFunc(o.bufferDuration, func() {
-			// Lock this function.
-			o.bufferMutex.Lock()
-			defer o.bufferMutex.Unlock()
+			// Lock function
+			o.listenersMutex.Lock()
+			defer o.listenersMutex.Unlock()
 
 			// Send all events in event buffer.
 			o.sendEvent(o.bufferEvents)
