@@ -2,5 +2,8 @@ sudo: false
 language: go
 script:
   - go get -u github.com/golang/dep/cmd/dep
+  - go get -u github.com/golang/lint/golint
   - make clean vendor all install
   - make test-unit
+  - make lint
+  - make vet
