@@ -15,6 +15,11 @@ fmt: $(SOURCE)
 lint: $(SOURCE)
 	golint -min_confidence 0.9 observer/...
 
+.PHONY: vet
+vet: $(SOURCE)
+	go tool vet main.go
+	go tool vet observer
+
 .PHONY: clean
 clean:
 	$(RM) observe

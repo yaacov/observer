@@ -4,3 +4,5 @@ script:
   - go get -u github.com/golang/dep/cmd/dep
   - make clean vendor all install
   - make test-unit
+  - make lint
+  - make vet

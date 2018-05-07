@@ -42,7 +42,7 @@ type Observer struct {
 	watchPatterns  set.Set
 	watchDirs      set.Set
 	listeners      []Listener
-	mutex          sync.Mutex
+	mutex          *sync.Mutex
 	bufferEvents   []interface{}
 	bufferDuration time.Duration
 	Verbose        bool
@@ -51,6 +51,11 @@ type Observer struct {
 // Open the observer channles and run the event loop,
 // it will return an error if event loop already running.
 func (o *Observer) Open() error {
+	// Check for mutex
+	if o.mutex == nil {
+		o.mutex = &sync.Mutex{}
+	}
+
 	if o.events != nil {
 		return fmt.Errorf("Observer already inititated.")
 	}
@@ -87,6 +92,11 @@ func (o *Observer) Close() error {
 // AddListener adds a listener function to run on event,
 // the listener function will recive the event object as argument.
 func (o *Observer) AddListener(l Listener) {
+	// Check for mutex
+	if o.mutex == nil {
+		o.mutex = &sync.Mutex{}
+	}
+
 	// Lock:
 	// 1. operations on array listeners
 	o.mutex.Lock()
@@ -104,6 +114,11 @@ func (o *Observer) Emit(event interface{}) {
 // Watch for file changes, watching a file can be done using exact file name,
 // or shell pattern matching.
 func (o *Observer) Watch(files []string) error {
+	// Check for mutex
+	if o.mutex == nil {
+		o.mutex = &sync.Mutex{}
+	}
+
 	// Lock:
 	// 1. operations on watchPatterns set.
 	o.mutex.Lock()
