@@ -42,7 +42,7 @@ type Observer struct {
 	watchPatterns  set.Set
 	watchDirs      set.Set
 	listeners      []Listener
-	listenersMutex sync.Mutex
+	mutex          sync.Mutex
 	bufferEvents   []interface{}
 	bufferDuration time.Duration
 	Verbose        bool
@@ -87,9 +87,10 @@ func (o *Observer) Close() error {
 // AddListener adds a listener function to run on event,
 // the listener function will recive the event object as argument.
 func (o *Observer) AddListener(l Listener) {
-	// Lock this function
-	o.listenersMutex.Lock()
-	defer o.listenersMutex.Unlock()
+	// Lock:
+	// 1. operations on array listeners
+	o.mutex.Lock()
+	defer o.mutex.Unlock()
 
 	o.listeners = append(o.listeners, l)
 }
@@ -103,6 +104,11 @@ func (o *Observer) Emit(event interface{}) {
 // Watch for file changes, watching a file can be done using exact file name,
 // or shell pattern matching.
 func (o *Observer) Watch(files []string) error {
+	// Lock:
+	// 1. operations on watchPatterns set
+	o.mutex.Lock()
+	defer o.mutex.Unlock()
+
 	// Init watcher on first call.
 	if o.watcher == nil {
 		err := o.watchLoop()
@@ -166,6 +172,10 @@ func (o *Observer) SetBufferDuration(d time.Duration) {
 
 // sendEvent send one or more events to the observer listeners.
 func (o *Observer) sendEvent(event interface{}) {
+	// NOTE: we do not lock this function directly.
+	//
+	// All functions using sendEvent must be locked
+	// for operations using o.listeners.
 	for _, listener := range o.listeners {
 		go listener(event)
 	}
@@ -173,9 +183,12 @@ func (o *Observer) sendEvent(event interface{}) {
 
 // handleEvent handle an event.
 func (o *Observer) handleEvent(event interface{}, f *string) {
-	// Lock function
-	o.listenersMutex.Lock()
-	defer o.listenersMutex.Unlock()
+	// Lock:
+	// 1. operations on listeners array (sendEvent)
+	// 2. operations on bufferEvents array
+	// 3. operations using the watchPatterns set (matchFile)
+	o.mutex.Lock()
+	defer o.mutex.Unlock()
 
 	// Check for file name match, nil is match all.
 	if !o.matchFile(f) {
@@ -194,9 +207,11 @@ func (o *Observer) handleEvent(event interface{}, f *string) {
 	// If this is the first event, set a timeout function.
 	if len(o.bufferEvents) == 1 {
 		time.AfterFunc(o.bufferDuration, func() {
-			// Lock function
-			o.listenersMutex.Lock()
-			defer o.listenersMutex.Unlock()
+			// Lock:
+			// 1. operations on listeners array (sendEvent)
+			// 2. operations on bufferEvents array
+			o.mutex.Lock()
+			defer o.mutex.Unlock()
 
 			// Send all events in event buffer.
 			o.sendEvent(o.bufferEvents)
