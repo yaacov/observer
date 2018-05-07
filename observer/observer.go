@@ -105,7 +105,7 @@ func (o *Observer) Emit(event interface{}) {
 // or shell pattern matching.
 func (o *Observer) Watch(files []string) error {
 	// Lock:
-	// 1. operations on watchPatterns set
+	// 1. operations on watchPatterns set.
 	o.mutex.Lock()
 	defer o.mutex.Unlock()
 
@@ -184,9 +184,9 @@ func (o *Observer) sendEvent(event interface{}) {
 // handleEvent handle an event.
 func (o *Observer) handleEvent(event interface{}, f *string) {
 	// Lock:
-	// 1. operations on listeners array (sendEvent)
-	// 2. operations on bufferEvents array
-	// 3. operations using the watchPatterns set (matchFile)
+	// 1. operations on listeners array (sendEvent).
+	// 2. operations on bufferEvents array.
+	// 3. operations using the watchPatterns set (matchFile).
 	o.mutex.Lock()
 	defer o.mutex.Unlock()
 
@@ -208,8 +208,8 @@ func (o *Observer) handleEvent(event interface{}, f *string) {
 	if len(o.bufferEvents) == 1 {
 		time.AfterFunc(o.bufferDuration, func() {
 			// Lock:
-			// 1. operations on listeners array (sendEvent)
-			// 2. operations on bufferEvents array
+			// 1. operations on listeners array (sendEvent).
+			// 2. operations on bufferEvents array.
 			o.mutex.Lock()
 			defer o.mutex.Unlock()
 
@@ -279,7 +279,7 @@ func (o *Observer) watchLoop() error {
 		for {
 			select {
 			case event := <-o.watcher.Events:
-				// Logging all events
+				// Logging all events.
 				if o.Verbose {
 					log.Printf("[Debug] Received event: %v", event)
 				}
