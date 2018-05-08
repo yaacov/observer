@@ -119,6 +119,11 @@ func TestWatch(t *testing.T) {
 	defer os.RemoveAll(dir) // clean up
 	tmpfn := filepath.Join(dir, "test_watch.txt")
 
+	// Open file.
+	if err := ioutil.WriteFile(tmpfn, content, 0666); err != nil {
+		t.Error("error writing to temp file.")
+	}
+
 	// watch temporary dir
 	o.Watch([]string{tmpfn})
 	defer o.Close()
@@ -128,6 +133,7 @@ func TestWatch(t *testing.T) {
 		done <- true
 	})
 
+	// Write to file.
 	if err := ioutil.WriteFile(tmpfn, content, 0666); err != nil {
 		t.Error("error writing to temp file.")
 	}
