@@ -18,43 +18,96 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
 	"os/signal"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/yaacov/observer/observer"
 )
 
+type arrayFlags []string
+
+func (i *arrayFlags) String() string {
+	return "my string representation"
+}
+
+func (i *arrayFlags) Set(value string) error {
+	*i = append(*i, value)
+	return nil
+}
+
+func runScript(s string) (err error) {
+	// Get command line to run on events.
+	c := strings.Split(s, " ")
+
+	// If script has no args, just run it, o/w sent args.
+	if len(c) == 1 {
+		err = exec.Command(c[0]).Run()
+	} else if len(c) > 1 {
+		err = exec.Command(c[0], c[1:]...).Run()
+	}
+
+	return
+}
+
+func printUsage() {
+	fmt.Println("Usage:")
+	flag.PrintDefaults()
+
+	fmt.Println("")
+	fmt.Println("Examples:")
+	fmt.Println("  observer -w main.c -r ./run.sh")
+	fmt.Println("  observer -w main.c -w src/*.c -r run.sh -d 1")
+
+	os.Exit(1)
+}
+
 func main() {
 	var err error
+	var watchFiles arrayFlags
+	var scripts arrayFlags
+
+	// Create a mutex for the event listener.
+	mutex := &sync.Mutex{}
 
 	// Parse cli arguments.
-	watchPtr := flag.String("w", "./*", "space sperated list of files to watch.")
-	runPtr := flag.String("r", "./run.sh", "shell command to run.")
-	dampingSecPtr := flag.Int("d", 0, "event damping time in sec.")
+	flag.Var(&watchFiles, "w", "list of files to watch.")
+	flag.Var(&scripts, "r", "list of scripts to run on file modifiaction event.")
+	bufferSecPtr := flag.Int("d", 0, "buffer events for N sec.")
 	verbosePtr := flag.Bool("V", false, "dump debug data.")
+
+	flag.Usage = printUsage
 	flag.Parse()
 
-	// Get watchFiles.
-	watchFiles := strings.Split(*watchPtr, " ")
+	// Check user input.
+	if len(watchFiles) < 1 {
+		fmt.Println("[Error] no watch files.")
+		flag.Usage()
+	}
 
-	// Get command line to run on events.
-	cmd := strings.Split(*runPtr, " ")
+	// Sanity check.
+	if len(scripts) < 1 {
+		fmt.Println("[Error] no scripts to run.")
+		flag.Usage()
+	}
 
 	// Open observer and start watching.
 	o := observer.Observer{}
+	defer o.Close()
+
+	// Set verbosity.
 	o.Verbose = *verbosePtr
 
-	// Set damping time if requested.
-	if *dampingSecPtr != 0 {
-		sec := time.Duration(*dampingSecPtr) * time.Second
+	// Set damping time.
+	if *bufferSecPtr != 0 {
+		sec := time.Duration(*bufferSecPtr) * time.Second
 		o.SetBufferDuration(sec)
 	}
-
-	defer o.Close()
 
 	// Watch for changes in files.
 	err = o.Watch(watchFiles)
@@ -64,16 +117,18 @@ func main() {
 
 	// Add a listener for events.
 	o.AddListener(func(e interface{}) {
-		log.Printf("Received: %v].\n", e)
+		// Lock the listener.
+		mutex.Lock()
+		defer mutex.Unlock()
 
-		if len(cmd) == 1 {
-			err = exec.Command(cmd[0]).Run()
-		} else if len(cmd) > 1 {
-			err = exec.Command(cmd[0], cmd[1:]...).Run()
-		}
+		// Log the event.
+		log.Printf("[Info]Received: %v\n", e)
 
-		if err != nil {
-			log.Printf("[Error] running event listener: %s.\n", err)
+		for _, s := range scripts {
+			// Try to run a script. and check for errors running script.
+			if err = runScript(s); err != nil {
+				log.Printf("[Error] running event listener: %s\n", err)
+			}
 		}
 	})
 
